@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BARBERSHOP IGOR - Sua Barbearia em Nazareno</title>
+    <!-- Favicon (ícone da aba do navegador) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💈</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* Adiciona rolagem suave */
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Inter', sans-serif;
         }
@@ -32,10 +38,12 @@
             <h1 class="text-2xl md:text-3xl font-bebas tracking-wider text-amber-400">BARBERSHOP IGOR</h1>
             <nav class="hidden md:flex space-x-6">
                 <a href="#services" class="hover:text-amber-400 transition duration-300">Serviços</a>
+                <a href="#gallery" class="hover:text-amber-400 transition duration-300">Galeria</a>
+                <a href="#testimonials" class="hover:text-amber-400 transition duration-300">Depoimentos</a>
                 <a href="#about" class="hover:text-amber-400 transition duration-300">Sobre</a>
                 <a href="#contact" class="hover:text-amber-400 transition duration-300">Contato</a>
             </nav>
-            <a href="https://api.whatsapp.com/send?phone=5535997564964&text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="bg-amber-400 text-black font-bold py-2 px-4 rounded-lg hover:bg-amber-500 transition duration-300">
+            <a href="https://api.whatsapp.com/send?phone=553599458955&text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="bg-amber-400 text-black font-bold py-2 px-4 rounded-lg hover:bg-amber-500 transition duration-300">
                 Agendar Horário
             </a>
         </div>
@@ -65,6 +73,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-zinc-800">
+                        <!-- Itens da tabela de preços -->
                         <tr class="border-b border-zinc-700">
                             <td class="p-4 md:p-6">Corte de Cabelo (Tesoura ou Máquina)</td>
                             <td class="p-4 md:p-6 text-right font-semibold">R$ 35,00</td>
@@ -103,6 +112,76 @@
         </div>
     </section>
 
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-20 bg-black">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bebas text-center mb-12 tracking-wider text-amber-400">Nossos Trabalhos</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Imagem 1 -->
+                <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Corte+Moderno" alt="Corte de cabelo moderno" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
+                    <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Corte Moderno</p>
+                </div>
+                <!-- Imagem 2 -->
+                <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Barba+Alinhada" alt="Barba perfeitamente alinhada" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
+                    <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Barba Alinhada</p>
+                </div>
+                <!-- Imagem 3 -->
+                <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Nevou" alt="Cabelo estilo 'Nevou'" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
+                    <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Nevou</p>
+                </div>
+                <!-- Imagem 4 -->
+                <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Luzes" alt="Cabelo com luzes" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
+                    <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Luzes</p>
+                </div>
+            </div>
+            <p class="text-center mt-8 text-zinc-400">Substitua estas imagens por fotos reais dos seus trabalhos!</p>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 bg-zinc-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bebas text-center mb-12 tracking-wider">O que Nossos Clientes Dizem</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Depoimento 1 -->
+                <div class="bg-zinc-800 p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                    <i class="fas fa-quote-left text-amber-400 text-3xl mb-4"></i>
+                    <p class="text-zinc-300 mb-6 italic">"Atendimento impecável e o melhor corte que já fiz na vida. O Igor é um profissional de primeira!"</p>
+                    <div class="text-amber-400 mb-2">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <h4 class="font-bold text-lg">- João P.</h4>
+                </div>
+                <!-- Depoimento 2 -->
+                <div class="bg-zinc-800 p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                    <i class="fas fa-quote-left text-amber-400 text-3xl mb-4"></i>
+                    <p class="text-zinc-300 mb-6 italic">"Ambiente agradável e serviço de alta qualidade. Minha barba nunca esteve tão bem cuidada. Recomendo!"</p>
+                    <div class="text-amber-400 mb-2">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <h4 class="font-bold text-lg">- Carlos M.</h4>
+                </div>
+                <!-- Depoimento 3 -->
+                <div class="bg-zinc-800 p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                    <i class="fas fa-quote-left text-amber-400 text-3xl mb-4"></i>
+                    <p class="text-zinc-300 mb-6 italic">"Fiz o 'nevou' e o resultado ficou incrível! O Igor tem muito talento e atenção aos detalhes. Virei cliente fiel."</p>
+                    <div class="text-amber-400 mb-2">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <h4 class="font-bold text-lg">- Lucas S.</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- About Section -->
     <section id="about" class="py-20 bg-black">
         <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
@@ -131,8 +210,8 @@
                     <i class="fab fa-whatsapp text-5xl text-green-500 mb-4"></i>
                     <h3 class="text-2xl font-bold mb-2">WhatsApp</h3>
                     <p class="text-lg text-zinc-300 mb-4">Clique no botão para agendar seu horário!</p>
-                    <a href="https://api.whatsapp.com/send?phone=5535997564964&text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300 inline-block">
-                       (35) 99756-4964
+                    <a href="https://api.whatsapp.com/send?phone=553599458955&text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300 inline-block">
+                       (35) 9945-8955
                     </a>
                 </div>
                 
