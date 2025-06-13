@@ -12,21 +12,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Adiciona rolagem suave */
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .font-bebas {
-            font-family: 'Bebas Neue', sans-serif;
-        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; padding-bottom: 120px; /* Space for the floating cart */ }
+        .font-bebas { font-family: 'Bebas Neue', sans-serif; }
         .hero-bg {
             background-image: url('https://placehold.co/1920x1080/1a1a1a/ffffff?text=Barbershop+Igor');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+        }
+        /* Custom checkbox style */
+        .form-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            height: 1.25rem;
+            width: 1.25rem;
+            border: 2px solid #4a5568;
+            border-radius: 0.25rem;
+            background-color: #2d3748;
+            cursor: pointer;
+            position: relative;
+        }
+        .form-checkbox:checked {
+            background-color: #f59e0b; /* amber-500 */
+            border-color: #f59e0b;
+        }
+        .form-checkbox:checked::after {
+            content: '✓';
+            font-size: 1rem;
+            color: black;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
@@ -36,14 +54,14 @@
     <header class="bg-black/80 backdrop-blur-sm fixed w-full top-0 z-50 shadow-lg">
         <div class="container mx-auto flex justify-between items-center p-4">
             <h1 class="text-2xl md:text-3xl font-bebas tracking-wider text-amber-400">BARBERSHOP IGOR</h1>
-            <nav class="hidden md:flex space-x-6">
-                <a href="#services" class="hover:text-amber-400 transition duration-300">Serviços</a>
-                <a href="#gallery" class="hover:text-amber-400 transition duration-300">Galeria</a>
-                <a href="#testimonials" class="hover:text-amber-400 transition duration-300">Depoimentos</a>
-                <a href="#about" class="hover:text-amber-400 transition duration-300">Sobre</a>
-                <a href="#contact" class="hover:text-amber-400 transition duration-300">Contato</a>
+            <nav class="hidden lg:flex space-x-6 text-sm">
+                 <a href="#services" class="hover:text-amber-400 transition duration-300">Serviços</a>
+                 <a href="#products" class="hover:text-amber-400 transition duration-300">Produtos</a>
+                 <a href="#gallery" class="hover:text-amber-400 transition duration-300">Galeria</a>
+                 <a href="#about" class="hover:text-amber-400 transition duration-300">Sobre</a>
+                 <a href="#contact" class="hover:text-amber-400 transition duration-300">Contato</a>
             </nav>
-            <a href="https://api.whatsapp.com/send?phone=553599458955&text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="bg-amber-400 text-black font-bold py-2 px-4 rounded-lg hover:bg-amber-500 transition duration-300">
+            <a href="#schedule" class="bg-amber-400 text-black font-bold py-2 px-4 rounded-lg hover:bg-amber-500 transition duration-300">
                 Agendar Horário
             </a>
         </div>
@@ -55,7 +73,7 @@
             <h2 class="text-5xl md:text-7xl font-bebas tracking-widest text-amber-400">ESTILO E PRECISÃO</h2>
             <p class="text-xl md:text-2xl mt-4 max-w-2xl">Sua busca pelo corte perfeito termina aqui. Qualidade e atendimento que você merece.</p>
             <a href="#services" class="mt-8 inline-block bg-amber-400 text-black font-bold py-3 px-8 rounded-lg text-lg hover:bg-amber-500 transition duration-300">
-                Ver Serviços
+                Monte seu Pedido
             </a>
         </div>
     </section>
@@ -63,7 +81,8 @@
     <!-- Services Section -->
     <section id="services" class="py-20 bg-zinc-900">
         <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bebas text-center mb-12 tracking-wider">Nossos Serviços</h2>
+            <h2 class="text-4xl font-bebas text-center mb-4 tracking-wider">Monte seu Combo</h2>
+            <p class="text-lg text-zinc-400 text-center mb-12 max-w-2xl mx-auto">Selecione os serviços que deseja. Seu pedido aparecerá na barra inferior da tela.</p>
             <div class="overflow-x-auto rounded-lg shadow-2xl shadow-black/30">
                 <table class="w-full min-w-max text-left border-collapse">
                     <thead class="bg-black">
@@ -72,43 +91,30 @@
                             <th class="p-4 md:p-6 text-lg font-bold text-amber-400 text-right">Preço</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-zinc-800">
-                        <!-- Itens da tabela de preços -->
-                        <tr class="border-b border-zinc-700">
-                            <td class="p-4 md:p-6">Corte de Cabelo (Tesoura ou Máquina)</td>
-                            <td class="p-4 md:p-6 text-right font-semibold">R$ 35,00</td>
-                        </tr>
-                        <tr class="border-b border-zinc-700 bg-zinc-800/50">
-                            <td class="p-4 md:p-6">Barba (Navalha e Toalha Quente)</td>
-                            <td class="p-4 md:p-6 text-right font-semibold">R$ 30,00</td>
-                        </tr>
-                        <tr class="border-b border-zinc-700">
-                            <td class="p-4 md:p-6">Sobrancelha (Pinça ou Navalha)</td>
-                            <td class="p-4 md:p-6 text-right font-semibold">R$ 15,00</td>
-                        </tr>
-                         <tr class="border-b border-zinc-700 bg-zinc-800/50">
-                            <td class="p-4 md:p-6">Pigmentação (Cabelo ou Barba)</td>
-                            <td class="p-4 md:p-6 text-right font-semibold">R$ 40,00</td>
-                        </tr>
-                        <tr class="border-b border-zinc-700">
-                            <td class="p-4 md:p-6 font-bold text-amber-300">Combo: Cabelo + Barba</td>
-                            <td class="p-4 md:p-6 text-right font-bold text-amber-300">R$ 60,00</td>
-                        </tr>
-                         <tr class="border-b border-zinc-700 bg-zinc-800/50">
-                            <td class="p-4 md:p-6 font-bold text-amber-300">Combo: Cabelo + Barba + Sobrancelha</td>
-                            <td class="p-4 md:p-6 text-right font-bold text-amber-300">R$ 70,00</td>
-                        </tr>
-                        <tr class="border-b border-zinc-700">
-                            <td class="p-4 md:p-6">Luzes / Mechas</td>
-                            <td class="p-4 md:p-6 text-right font-semibold">A partir de R$ 80,00</td>
-                        </tr>
-                        <tr class="border-b-0">
-                            <td class="p-4 md:p-6">Nevou (Descoloração Global)</td>
-                            <td class="p-4 md:p-6 text-right font-semibold">A partir de R$ 100,00</td>
-                        </tr>
+                    <tbody id="services-list" class="bg-zinc-800">
+                        <!-- Os serviços serão inseridos aqui via JS -->
                     </tbody>
                 </table>
             </div>
+        </div>
+    </section>
+    
+    <!-- Products Section -->
+    <section id="products" class="py-20 bg-black">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bebas text-center mb-12 tracking-wider">Adicione Produtos ao seu Pedido</h2>
+            <div id="products-list" class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Os produtos serão inseridos aqui via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Schedule Section (Re-styled) -->
+    <section id="schedule" class="py-20 bg-zinc-900">
+        <div class="container mx-auto px-4 text-center">
+             <h2 class="text-4xl font-bebas text-center mb-4 tracking-wider text-amber-400">Finalize seu Pedido</h2>
+             <p class="text-lg text-zinc-300 mb-8 max-w-2xl mx-auto">Após selecionar seus serviços e produtos, clique no botão na barra inferior para enviar seu pedido completo via WhatsApp e agendar seu horário!</p>
+             <i class="fab fa-whatsapp text-6xl text-green-500"></i>
         </div>
     </section>
 
@@ -117,139 +123,194 @@
         <div class="container mx-auto px-4">
             <h2 class="text-4xl font-bebas text-center mb-12 tracking-wider text-amber-400">Nossos Trabalhos</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <!-- Imagem 1 -->
+                <!-- IMAGEM 1 -->
                 <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
-                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Corte+Moderno" alt="Corte de cabelo moderno" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <img src="https://images.unsplash.com/photo-1621605815971-fbc32b2a8086?q=80&w=1887&auto=format&fit=crop" alt="Corte de cabelo moderno com tesoura" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500" onerror="this.onerror=null;this.src='https://placehold.co/400x400/3f3f46/amber-400?text=Corte+Moderno';">
                     <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
                     <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Corte Moderno</p>
                 </div>
-                <!-- Imagem 2 -->
+                <!-- IMAGEM 2 -->
                 <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
-                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Barba+Alinhada" alt="Barba perfeitamente alinhada" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <img src="https://images.unsplash.com/photo-1617850849493-4e17e751c9b4?q=80&w=1887&auto=format&fit=crop" alt="Barba perfeitamente alinhada e aparada" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500" onerror="this.onerror=null;this.src='https://placehold.co/400x400/3f3f46/amber-400?text=Barba+Alinhada';">
                     <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
                     <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Barba Alinhada</p>
                 </div>
-                <!-- Imagem 3 -->
+                <!-- IMAGEM 3 (FOTO DO CLIENTE) -->
                 <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
-                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Nevou" alt="Cabelo estilo 'Nevou'" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <img src="https://i.imgur.com/m41sF6z.jpeg" alt="Corte 'nevou' com desenho personalizado" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500" onerror="this.onerror=null;this.src='https://placehold.co/400x400/3f3f46/amber-400?text=Nevou';">
                     <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
-                    <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Nevou</p>
+                    <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">'Nevou'</p>
                 </div>
-                <!-- Imagem 4 -->
+                <!-- IMAGEM 4 -->
                 <div class="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer">
-                    <img src="https://placehold.co/400x400/3f3f46/amber-400?text=Luzes" alt="Cabelo com luzes" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                    <img src="https://images.unsplash.com/photo-1634352194236-f76114fd63a3?q=80&w=1887&auto=format&fit=crop" alt="Cabelo masculino com luzes sutis" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500" onerror="this.onerror=null;this.src='https://placehold.co/400x400/3f3f46/amber-400?text=Luzes';">
                     <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500"></div>
                     <p class="absolute bottom-4 left-4 text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">Luzes</p>
                 </div>
             </div>
-            <p class="text-center mt-8 text-zinc-400">Substitua estas imagens por fotos reais dos seus trabalhos!</p>
         </div>
     </section>
+    <section id="about" class="py-20 bg-zinc-900"><div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12"><div class="md:w-1/2"><img src="https://placehold.co/600x600/3f3f46/amber-400?text=Igor+Silva" alt="Foto de Igor Silva, o barbeiro" class="rounded-lg shadow-lg w-full"></div><div class="md:w-1/2 text-center md:text-left"><h2 class="text-4xl font-bebas mb-4 tracking-wider text-amber-400">SOBRE A BARBERSHOP IGOR</h2><p class="mb-4 text-lg text-zinc-300">Fundada por Igor Silva, a Barbershop Igor nasceu da paixão pela arte da barbearia clássica, com um toque moderno. Nosso compromisso é oferecer mais do que um simples serviço: proporcionamos uma experiência completa de cuidado masculino, com atendimento personalizado, produtos de alta qualidade e um ambiente acolhedor.</p></div></div></section>
+    <section id="contact" class="py-20 bg-black"><div class="container mx-auto px-4 text-center"><h2 class="text-4xl font-bebas mb-8 tracking-wider">Contato e Localização</h2><div class="flex flex-col md:flex-row justify-center items-center gap-8"><div class="bg-zinc-800 p-6 rounded-lg shadow-lg w-full md:w-auto"><i class="fab fa-whatsapp text-5xl text-green-500 mb-4"></i><h3 class="text-2xl font-bold mb-2">WhatsApp</h3><p class="text-lg text-zinc-300 mb-4">Clique para dúvidas ou contato direto.</p<a href="https://api.whatsapp.com/send?phone=553599458955" target="_blank" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300 inline-block">(35) 9945-8955</a></div><div class="bg-zinc-800 p-6 rounded-lg shadow-lg w-full md:w-auto"><i class="fab fa-instagram text-5xl text-pink-500 mb-4"></i><h3 class="text-2xl font-bold mb-2">Instagram</h3><p class="text-lg text-zinc-300 mb-4">Confira nossos trabalhos mais recentes!</p<a href="https://www.instagram.com/barbershopigorsilva/" target="_blank" class="bg-pink-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-pink-600 transition duration-300 inline-block">@barbershopigorsilva</a></div></div><div class="mt-12"><h3 class="text-2xl font-bold mb-2">Nosso Endereço</h3><p class="text-lg text-zinc-300">Rua: João Pio, 17, Nazareno - MG</p><div class="mt-4 w-full h-80 rounded-lg overflow-hidden shadow-lg"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3714.073289456251!2d-44.61117892574163!3d-21.42621457999885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9fd372370213197%3A0x6b133c9429712954!2sR.%20Jo%C3%A3o%20Pio%2C%2017%2C%20Nazareno%20-%20MG%2C%2036370-000!5e0!3m2!1spt-BR!2sbr!4v1718228352695!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></div></section>
+    <footer class="bg-zinc-800 text-center py-6"><div class="container mx-auto"><p>&copy; 2024 BARBERSHOP IGOR. Todos os direitos reservados.</p></div></footer>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="py-20 bg-zinc-900">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bebas text-center mb-12 tracking-wider">O que Nossos Clientes Dizem</h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Depoimento 1 -->
-                <div class="bg-zinc-800 p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                    <i class="fas fa-quote-left text-amber-400 text-3xl mb-4"></i>
-                    <p class="text-zinc-300 mb-6 italic">"Atendimento impecável e o melhor corte que já fiz na vida. O Igor é um profissional de primeira!"</p>
-                    <div class="text-amber-400 mb-2">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <h4 class="font-bold text-lg">- João P.</h4>
-                </div>
-                <!-- Depoimento 2 -->
-                <div class="bg-zinc-800 p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                    <i class="fas fa-quote-left text-amber-400 text-3xl mb-4"></i>
-                    <p class="text-zinc-300 mb-6 italic">"Ambiente agradável e serviço de alta qualidade. Minha barba nunca esteve tão bem cuidada. Recomendo!"</p>
-                    <div class="text-amber-400 mb-2">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <h4 class="font-bold text-lg">- Carlos M.</h4>
-                </div>
-                <!-- Depoimento 3 -->
-                <div class="bg-zinc-800 p-8 rounded-lg text-center transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                    <i class="fas fa-quote-left text-amber-400 text-3xl mb-4"></i>
-                    <p class="text-zinc-300 mb-6 italic">"Fiz o 'nevou' e o resultado ficou incrível! O Igor tem muito talento e atenção aos detalhes. Virei cliente fiel."</p>
-                    <div class="text-amber-400 mb-2">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                    </div>
-                    <h4 class="font-bold text-lg">- Lucas S.</h4>
-                </div>
+    <!-- Floating Cart Summary -->
+    <div id="cart-summary" class="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm p-4 transform translate-y-full transition-transform duration-300 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div>
+                <h3 class="font-bold text-lg text-amber-400">Seu Pedido:</h3>
+                <p id="cart-total" class="text-white font-semibold">Total: R$ 0,00</p>
+                <p id="cart-items-count" class="text-xs text-zinc-400">0 itens selecionados</p>
             </div>
+            <button id="checkout-button" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
+                <i class="fab fa-whatsapp mr-2"></i>
+                Finalizar Pedido
+            </button>
         </div>
-    </section>
+    </div>
 
-    <!-- About Section -->
-    <section id="about" class="py-20 bg-black">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
-            <div class="md:w-1/2">
-                <img src="https://placehold.co/600x600/3f3f46/amber-400?text=Igor+Silva" alt="Foto de Igor Silva, o barbeiro" class="rounded-lg shadow-lg w-full">
-            </div>
-            <div class="md:w-1/2 text-center md:text-left">
-                <h2 class="text-4xl font-bebas mb-4 tracking-wider text-amber-400">SOBRE A BARBERSHOP IGOR</h2>
-                <p class="mb-4 text-lg text-zinc-300">
-                    Fundada por Igor Silva, a Barbershop Igor nasceu da paixão pela arte da barbearia clássica, com um toque moderno. Nosso compromisso é oferecer mais do que um simples serviço: proporcionamos uma experiência completa de cuidado masculino, com atendimento personalizado, produtos de alta qualidade e um ambiente acolhedor.
-                </p>
-                <p class="text-lg text-zinc-300">
-                    Aqui, cada cliente é único. Valorizamos a sua confiança e trabalhamos para que você saia com a autoestima renovada e o visual impecável.
-                </p>
-            </div>
-        </div>
-    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const servicesListEl = document.getElementById('services-list');
+            const productsListEl = document.getElementById('products-list');
+            const cartSummaryEl = document.getElementById('cart-summary');
+            const cartTotalEl = document.getElementById('cart-total');
+            const cartItemsCountEl = document.getElementById('cart-items-count');
+            const checkoutButton = document.getElementById('checkout-button');
 
-    <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-zinc-900">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-4xl font-bebas mb-8 tracking-wider">Contato e Localização</h2>
-            <div class="flex flex-col md:flex-row justify-center items-center gap-8">
-                <!-- WhatsApp -->
-                <div class="bg-zinc-800 p-6 rounded-lg shadow-lg w-full md:w-auto">
-                    <i class="fab fa-whatsapp text-5xl text-green-500 mb-4"></i>
-                    <h3 class="text-2xl font-bold mb-2">WhatsApp</h3>
-                    <p class="text-lg text-zinc-300 mb-4">Clique no botão para agendar seu horário!</p>
-                    <a href="https://api.whatsapp.com/send?phone=553599458955&text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300 inline-block">
-                       (35) 9945-8955
-                    </a>
-                </div>
+            const phoneNumber = "553599458955";
+
+            // --- Database of Services and Products ---
+            const services = [
+                { id: 'serv1', name: 'Corte de Cabelo (Tesoura ou Máquina)', price: 35.00 },
+                { id: 'serv2', name: 'Barba (Navalha e Toalha Quente)', price: 30.00 },
+                { id: 'serv3', name: 'Sobrancelha (Pinça ou Navalha)', price: 15.00 },
+                { id: 'serv4', name: 'Pigmentação (Cabelo ou Barba)', price: 40.00 },
+                { id: 'serv5', name: 'Luzes / Mechas', price: 80.00 },
+                { id: 'serv6', name: 'Nevou (Descoloração Global)', price: 100.00 },
+            ];
+
+            const products = [
+                { id: 'prod1', name: 'Pomada Modeladora', description: 'Efeito matte, alta fixação.', price: 45.00 },
+                { id: 'prod2', name: 'Balm para Barba', description: 'Hidrata, amacia e alivia a coceira.', price: 50.00 },
+                { id: 'prod3', name: 'Shampoo Fortalecedor', description: 'Limpeza e combate à queda.', price: 55.00 },
+                { id: 'prod4', name: 'Óleo para Barba', description: 'Brilho, maciez e um aroma incrível.', price: 40.00 },
+            ];
+
+            let cart = [];
+
+            // --- Functions to Render UI ---
+            const renderServices = () => {
+                servicesListEl.innerHTML = services.map((service, index) => `
+                    <tr class="border-b border-zinc-700 ${index % 2 !== 0 ? 'bg-zinc-800/50' : ''}">
+                        <td class="p-4 md:p-6">
+                            <label for="${service.id}" class="flex items-center cursor-pointer group">
+                                <input type="checkbox" id="${service.id}" class="form-checkbox item-checkbox" data-id="${service.id}" data-type="service">
+                                <span class="ml-4 group-hover:text-amber-400 transition-colors">${service.name}</span>
+                            </label>
+                        </td>
+                        <td class="p-4 md:p-6 text-right font-semibold">R$ ${service.price.toFixed(2).replace('.',',')}</td>
+                    </tr>
+                `).join('');
+            };
+            
+            const renderProducts = () => {
+                productsListEl.innerHTML = products.map(product => `
+                    <div class="bg-zinc-800 rounded-lg text-center p-6 shadow-lg flex flex-col">
+                        <img src="https://placehold.co/300x300/3f3f46/amber-400?text=Produto" alt="${product.name}" class="rounded-md mb-4 w-full h-48 object-cover">
+                        <h3 class="font-bold text-xl text-amber-400 mb-2">${product.name}</h3>
+                        <p class="text-zinc-400 flex-grow">${product.description}</p>
+                        <p class="text-2xl font-bold mt-4 mb-4">R$ ${product.price.toFixed(2).replace('.',',')}</p>
+                        <label for="${product.id}" class="mt-auto bg-amber-500 text-black font-bold py-2 px-4 rounded-lg hover:bg-amber-600 transition cursor-pointer w-full">
+                            <input type="checkbox" id="${product.id}" class="hidden item-checkbox" data-id="${product.id}" data-type="product">
+                            <span class="checkbox-label">Adicionar ao Pedido</span>
+                        </label>
+                    </div>
+                `).join('');
+            };
+
+            // --- Cart Logic ---
+            const updateCart = () => {
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                cartTotalEl.textContent = `Total: R$ ${total.toFixed(2).replace('.',',')}`;
+                cartItemsCountEl.textContent = `${cart.length} ${cart.length === 1 ? 'item selecionado' : 'itens selecionados'}`;
+
+                if (cart.length > 0) {
+                    cartSummaryEl.classList.remove('translate-y-full');
+                    checkoutButton.disabled = false;
+                } else {
+                    cartSummaryEl.classList.add('translate-y-full');
+                    checkoutButton.disabled = true;
+                }
+            };
+
+            const handleItemSelection = (e) => {
+                if (!e.target.classList.contains('item-checkbox')) return;
                 
-                <!-- Instagram -->
-                <div class="bg-zinc-800 p-6 rounded-lg shadow-lg w-full md:w-auto">
-                    <i class="fab fa-instagram text-5xl text-pink-500 mb-4"></i>
-                    <h3 class="text-2xl font-bold mb-2">Instagram</h3>
-                    <p class="text-lg text-zinc-300 mb-4">Confira nossos trabalhos mais recentes!</p>
-                    <a href="https://www.instagram.com/barbershopigorsilva/" target="_blank" class="bg-pink-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-pink-600 transition duration-300 inline-block">
-                        @barbershopigorsilva
-                    </a>
-                </div>
-            </div>
-             <div class="mt-12">
-                <h3 class="text-2xl font-bold mb-2">Nosso Endereço</h3>
-                <p class="text-lg text-zinc-300">Rua: João Pio, 17, Nazareno - MG</p>
-                <div class="mt-4 w-full h-80 rounded-lg overflow-hidden shadow-lg">
-                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3714.073289456251!2d-44.61117892574163!3d-21.42621457999885!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9fd372370213197%3A0x6b133c9429712954!2sR.%20Jo%C3%A3o%20Pio%2C%2017%2C%20Nazareno%20-%20MG%2C%2036370-000!5e0!3m2!1spt-BR!2sbr!4v1718228352695!5m2!1spt-BR!2sbr"
-                    width="100%"
-                    height="100%"
-                    style="border:0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </div>
-            </div>
-        </div>
-    </section>
+                const checkbox = e.target;
+                const id = checkbox.dataset.id;
+                const type = checkbox.dataset.type;
+                const sourceArray = type === 'service' ? services : products;
+                const item = sourceArray.find(i => i.id === id);
 
-    <!-- Footer -->
-    <footer class="bg-black text-center py-6">
-        <div class="container mx-auto">
-            <p>&copy; 2024 BARBERSHOP IGOR. Todos os direitos reservados.</p>
-            <p>Desenvolvido com ❤️</p>
-        </div>
-    </footer>
+                if (checkbox.checked) {
+                    cart.push(item);
+                } else {
+                    cart = cart.filter(cartItem => cartItem.id !== id);
+                }
+                
+                // Visual feedback for product cards
+                if (type === 'product') {
+                    const label = checkbox.nextElementSibling;
+                    label.textContent = checkbox.checked ? 'Adicionado ✓' : 'Adicionar ao Pedido';
+                    label.parentElement.classList.toggle('bg-green-500', checkbox.checked);
+                    label.parentElement.classList.toggle('bg-amber-500', !checkbox.checked);
+                }
 
+                updateCart();
+            };
+            
+            const generateWhatsAppMessage = () => {
+                let message = "Olá, Barbershop Igor! Gostaria de agendar o(s) seguinte(s) item(ns):\n\n";
+                
+                const serviceItems = cart.filter(item => services.some(s => s.id === item.id));
+                const productItems = cart.filter(item => products.some(p => p.id === item.id));
+
+                if (serviceItems.length > 0) {
+                    message += "*SERVIÇOS:*\n";
+                    serviceItems.forEach(item => {
+                        message += `- ${item.name} (R$ ${item.price.toFixed(2).replace('.',',')})\n`;
+                    });
+                }
+
+                if (productItems.length > 0) {
+                    message += "\n*PRODUTOS:*\n";
+                    productItems.forEach(item => {
+                        message += `- ${item.name} (R$ ${item.price.toFixed(2).replace('.',',')})\n`;
+                    });
+                }
+                
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                message += `\n*Total do Pedido: R$ ${total.toFixed(2).replace('.',',')}*`;
+                message += "\n\nQual o melhor horário para mim?";
+
+                return encodeURIComponent(message);
+            };
+
+            // --- Event Listeners ---
+            checkoutButton.addEventListener('click', () => {
+                const message = generateWhatsAppMessage();
+                const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
+                window.open(whatsappURL, '_blank');
+            });
+
+            servicesListEl.addEventListener('change', handleItemSelection);
+            productsListEl.addEventListener('change', handleItemSelection);
+            
+            // --- Initial Render ---
+            renderServices();
+            renderProducts();
+        });
+    </script>
 </body>
 </html>
