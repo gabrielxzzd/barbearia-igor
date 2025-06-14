@@ -187,18 +187,8 @@
         <div class="container mx-auto px-4">
             <h2 class="text-4xl font-bebas text-center mb-4 tracking-wider">Nossos Serviços</h2>
             <p class="text-lg text-zinc-400 text-center mb-12 max-w-2xl mx-auto">Selecione os serviços que deseja. Seu pedido aparecerá na barra inferior da tela.</p>
-            <div class="overflow-x-auto rounded-lg shadow-2xl shadow-black/30">
-                <table class="w-full min-w-max text-left border-collapse">
-                    <thead class="bg-black">
-                        <tr>
-                            <th class="p-4 md:p-6 text-lg font-bold text-amber-400">Serviço</th>
-                            <th class="p-4 md:p-6 text-lg font-bold text-amber-400 text-right">Preço</th>
-                        </tr>
-                    </thead>
-                    <tbody id="services-list" class="bg-zinc-800">
-                        <!-- Serviços inseridos via JS -->
-                    </tbody>
-                </table>
+            <div id="services-list" class="bg-zinc-800 rounded-lg shadow-2xl shadow-black/30 divide-y divide-zinc-700">
+                <!-- Serviços inseridos via JS -->
             </div>
         </div>
     </section>
@@ -373,15 +363,13 @@
                         ? `<span class="ml-2 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-full align-middle">${service.highlight}</span>` 
                         : '';
                     return `
-                    <tr class="border-b border-zinc-700 ${index % 2 !== 0 ? 'bg-zinc-800/50' : ''}">
-                        <td class="p-4 md:p-6">
-                            <label for="${service.id}" class="flex items-center cursor-pointer group">
-                                <input type="checkbox" id="${service.id}" class="form-checkbox item-checkbox" data-id="${service.id}" data-type="service" aria-label="Selecionar ${service.name}">
-                                <span class="ml-4 group-hover:text-amber-400 transition-colors">${service.name}${highlightBadge}</span>
-                            </label>
-                        </td>
-                        <td class="p-4 md:p-6 text-right font-semibold">${formatCurrency(service.price)}</td>
-                    </tr>
+                    <div class="flex justify-between items-center p-4 ${index % 2 !== 0 ? 'bg-zinc-800/50' : ''}">
+                        <label for="${service.id}" class="flex items-center cursor-pointer group flex-1 pr-4">
+                            <input type="checkbox" id="${service.id}" class="form-checkbox item-checkbox flex-shrink-0" data-id="${service.id}" data-type="service" aria-label="Selecionar ${service.name}">
+                            <span class="ml-4 group-hover:text-amber-400 transition-colors">${service.name}${highlightBadge}</span>
+                        </label>
+                        <span class="font-semibold text-lg">${formatCurrency(service.price)}</span>
+                    </div>
                 `}).join('');
             };
             
