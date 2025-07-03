@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração - Barbearia Igor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-bebas { 
+            font-family: 'Bebas Neue', sans-serif; 
+        }
+        /* Custom scrollbar for date picker */
+        .date-selector::-webkit-scrollbar {
+            height: 4px;
+        }
+        .date-selector::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+        .date-selector::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-zinc-900 text-white">
+
+    <header class="bg-black shadow-lg">
+        <div class="container mx-auto p-4">
+            <h1 class="text-2xl md:text-3xl font-bebas tracking-wider text-amber-400">Painel de Administração</h1>
+            <p class="text-zinc-400">Gestão de Agendamentos</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 mt-8">
+        <div class="max-w-4xl mx-auto bg-zinc-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-bebas tracking-wider mb-4">Selecione o Dia</h2>
+            <div id="date-selector" class="date-selector flex space-x-3 overflow-x-auto pb-4">
+                <!-- Datas serão inseridas aqui -->
+            </div>
+        </div>
+
+        <div id="appointments-list" class="mt-8 max-w-4xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                 <h2 class="text-2xl font-bebas tracking-wider">Agendamentos para <span id="selected-date-label" class="text-amber-400"></span></h2>
+                 <div class="text-right bg-black p-4 rounded-lg">
+                     <p class="text-lg"><strong id="appointments-count">0</strong> agendamentos</p>
+                     <p class="text-lg font-bold text-green-400">Total: <strong id="total-revenue">R$ 0,00</strong></p>
+                 </div>
+            </div>
+            <div id="appointments-container" class="space-y-4">
+                <!-- Agendamentos serão inseridos aqui -->
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appointmentsCollection = collection(db, `artifacts/${appId}/public/data/appointments`);
+
+        const elements = {
+            dateSelector: document.getElementById('date-selector'),
+            selectedDateLabel: document.getElementById('selected-date-label'),
+            appointmentsContainer: document.getElementById('appointments-container'),
+            appointmentsCount: document.getElementById('appointments-count'),
+            totalRevenue: document.getElementById('total-revenue'),
+        };
+
+        let unsubscribeAppointments = () => {};
+
+        const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+
+        const renderDateSelector = () => {
+            elements.dateSelector.innerHTML = '';
+            for (let i = 0; i < 14; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                const dateString = date.toISOString().split('T')[0];
+                const dayName = date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+                const dayNumber = date.getDate();
+
+                const isToday = i === 0;
+                const buttonClasses = `
+                    flex-shrink-0 text-center p-3 rounded-lg cursor-pointer transition-colors w-20
+                    ${isToday ? 'bg-amber-400 text-black' : 'bg-zinc-700 hover:bg-zinc-600'}
+                `;
+
+                elements.dateSelector.innerHTML += `
+                    <button class="date-btn ${buttonClasses}" data-date="${dateString}">
+                        <p class="font-bold capitalize">${dayName}</p>
+                        <p class="text-2xl font-bold">${dayNumber}</p>
+                    </button>
+                `;
+            }
+        };
+
+        const renderAppointments = (appointments) => {
+            elements.appointmentsContainer.innerHTML = '';
+            
+            let totalRevenue = 0;
+            elements.appointmentsCount.textContent = appointments.length;
+
+            if (appointments.length === 0) {
+                elements.appointmentsContainer.innerHTML = '<p class="text-zinc-400 text-center py-8">Nenhum agendamento para esta data.</p>';
+                elements.totalRevenue.textContent = formatCurrency(0);
+                return;
+            }
+
+            const sortedAppointments = appointments.sort((a, b) => a.time.localeCompare(b.time));
+
+            sortedAppointments.forEach(app => {
+                totalRevenue += app.total || 0;
+                const servicesList = app.services && app.services.length > 0 ? `<li>${app.services.join('</li><li>')}</li>` : '';
+                const productsList = app.products && app.products.length > 0 ? `<li>${app.products.join('</li><li>')}</li>` : '';
+
+                const appointmentCard = `
+                    <div class="bg-black p-4 rounded-lg shadow-md flex justify-between items-center">
+                        <div>
+                            <p class="text-xl font-bold text-amber-400">${app.time}</p>
+                            <p class="font-semibold mt-2">${app.clientName || 'Cliente não informado'}</p>
+                            <p class="text-sm text-zinc-400">${app.clientPhone || ''}</p>
+                            <div class="text-sm text-zinc-300 mt-2">
+                                <ul class="list-disc list-inside">
+                                    ${servicesList}
+                                    ${productsList}
+                                </ul>
+                            </div>
+                            <p class="text-lg font-bold mt-2">${formatCurrency(app.total || 0)}</p>
+                        </div>
+                        <button class="cancel-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition" data-id="${app.id}">
+                            <i class="fas fa-trash-alt mr-2"></i>Cancelar
+                        </button>
+                    </div>
+                `;
+                elements.appointmentsContainer.innerHTML += appointmentCard;
+            });
+
+            elements.totalRevenue.textContent = formatCurrency(totalRevenue);
+        };
+
+        const listenToAppointments = (dateString) => {
+            unsubscribeAppointments();
+            const dateObj = new Date(dateString + 'T00:00:00');
+            elements.selectedDateLabel.textContent = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            
+            const q = query(appointmentsCollection, where("date", "==", dateString));
+
+            unsubscribeAppointments = onSnapshot(q, (querySnapshot) => {
+                const appointments = [];
+                querySnapshot.forEach((doc) => {
+                    appointments.push({ id: doc.id, ...doc.data() });
+                });
+                renderAppointments(appointments);
+            });
+        };
+
+        elements.dateSelector.addEventListener('click', (e) => {
+            const dateButton = e.target.closest('.date-btn');
+            if (dateButton) {
+                document.querySelectorAll('.date-btn').forEach(btn => {
+                    btn.classList.remove('bg-amber-400', 'text-black');
+                    btn.classList.add('bg-zinc-700');
+                });
+                dateButton.classList.add('bg-amber-400', 'text-black');
+                dateButton.classList.remove('bg-zinc-700');
+
+                listenToAppointments(dateButton.dataset.date);
+            }
+        });
+
+        elements.appointmentsContainer.addEventListener('click', async (e) => {
+            const cancelButton = e.target.closest('.cancel-btn');
+            if (cancelButton) {
+                const docId = cancelButton.dataset.id;
+                if (confirm('Tem a certeza que deseja cancelar este agendamento?')) {
+                    try {
+                        await deleteDoc(doc(appointmentsCollection, docId));
+                        // A atualização será automática devido ao onSnapshot
+                    } catch (error) {
+                        console.error("Erro ao cancelar agendamento: ", error);
+                        alert("Não foi possível cancelar o agendamento.");
+                    }
+                }
+            }
+        });
+
+        // --- Inicialização ---
+        (async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                renderDateSelector();
+                // Definir data inicial para hoje
+                const today = new Date().toISOString().split('T')[0];
+                listenToAppointments(today);
+            } catch (error) {
+                console.error("Erro na autenticação:", error);
+            }
+        })();
+    </script>
+</body>
+</html>
