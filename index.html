@@ -379,562 +379,573 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, onSnapshot, addDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuração do Firebase
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appointmentsCollection = collection(db, `artifacts/${appId}/public/data/appointments`);
-
-
-        // --- Constantes e Variáveis ---
-        const elements = {
-            servicesList: document.getElementById('services-list'),
-            productsList: document.getElementById('products-list'),
-            galleryGrid: document.getElementById('gallery-grid'),
-            testimonialsGrid: document.getElementById('testimonials-grid'),
-            cartSummary: document.getElementById('cart-summary'),
-            cartTotal: document.getElementById('cart-total'),
-            cartItemsCount: document.getElementById('cart-items-count'),
-            checkoutButton: document.getElementById('checkout-button'),
-            mobileMenuButton: document.getElementById('mobile-menu-button'),
-            mobileMenu: document.getElementById('mobile-menu'),
-            menuLinks: document.querySelectorAll('.menu-link'),
-            backToTopButton: document.getElementById('back-to-top'),
-            productModal: document.getElementById('product-modal'),
-            modalCloseButton: document.getElementById('modal-close-button'),
-            modalProductImage: document.getElementById('modal-product-image'),
-            modalProductTitle: document.getElementById('modal-product-title'),
-            modalProductDescription: document.getElementById('modal-product-description'),
-            modalProductPrice: document.getElementById('modal-product-price'),
-            modalAddToCartButton: document.getElementById('modal-add-to-cart-button'),
-            calendarGrid: document.getElementById('calendar-grid'),
-            monthYearLabel: document.getElementById('month-year-label'),
-            prevMonthBtn: document.getElementById('prev-month-btn'),
-            nextMonthBtn: document.getElementById('next-month-btn'),
-            timeSlotsGrid: document.getElementById('time-slots-grid'),
-            confirmationModal: document.getElementById('confirmation-modal'),
-            confirmationSummary: document.getElementById('confirmation-summary'),
-            cancelConfirmationBtn: document.getElementById('cancel-confirmation-btn'),
-            confirmBookingBtn: document.getElementById('confirm-booking-btn'),
-            clientNameInput: document.getElementById('client-name'),
-            clientPhoneInput: document.getElementById('client-phone'),
-        };
-
-        const phoneNumber = "553599458955";
-
-        const data = {
-            services: [
-                { id: 'serv1', name: 'Corte de Cabelo', price: 30.00 },
-                { id: 'serv2', name: 'Barba', price: 20.00 },
-                { id: 'serv3', name: 'Sobrancelha', price: 5.00 },
-                { id: 'serv4', name: 'Combo (Corte, Barba e Sobrancelha)', price: 50.00 },
-                { id: 'serv5', name: 'Pezinho', price: 10.00 },
-                { id: 'serv6', name: 'Pigmentação', price: 100.00 },
-                { id: 'serv7', name: 'Platinado', price: 100.00 },
-                { id: 'serv8', name: 'Combo Mensal (Cabelo, Barba e Sobrancelha)', price: 170.00, highlight: 'Mais Pedido' },
-            ],
-            products: [
-                { id: 'prod1', name: 'Pomada Modeladora', description: 'Efeito matte, alta fixação.', price: 45.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Pomada' },
-                { id: 'prod2', name: 'Balm para Barba', description: 'Hidrata, amacia e alivia a coceira.', price: 50.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Balm' },
-                { id: 'prod3', name: 'Shampoo Fortalecedor', description: 'Limpeza e combate à queda.', price: 55.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Shampoo' },
-                { id: 'prod4', name: 'Óleo para Barba', description: 'Brilho, maciez e um aroma incrível.', price: 40.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Óleo' },
-            ],
-            gallery: [
-                { src: 'https://i.imgur.com/dtzKRWS.jpeg', alt: 'Corte Moderno' },
-                { src: 'https://i.imgur.com/IXPtx0W.jpeg', alt: 'Barba Alinhada' },
-                { src: 'https://i.imgur.com/rSIUamO.jpeg', alt: 'Platinado' },
-                { src: 'https://i.imgur.com/Vwo6xSG.jpeg', alt: 'Pigmentação' },
-            ],
-            testimonials: [
-                { name: 'João P.', text: 'Atendimento nota 10 e o corte ficou exatamente como eu queria. Virei cliente fiel!', rating: 5 },
-                { name: 'Carlos S.', text: 'Melhor barbearia da região! Ambiente agradável e profissionais excelentes.', rating: 5 },
-                { name: 'Lucas M.', text: 'O Igor tem a mão boa para a barba. Recomendo a todos que querem um serviço de qualidade.', rating: 5 },
-            ]
-        };
-        
-        let cart = [];
-        let selectedDate = null;
-        let selectedTime = null;
-        let currentDate = new Date();
-        let bookedTimes = {};
-        let unsubscribeAppointments = () => {};
-
-        // --- Funções de Renderização ---
-
-        const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
-
-        const renderServices = () => {
-            if(!elements.servicesList) return;
-            elements.servicesList.innerHTML = data.services.map((service, index) => {
-                const highlightBadge = service.highlight 
-                    ? `<span class="ml-2 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-full align-middle">${service.highlight}</span>` 
-                    : '';
-                return `
-                <div class="flex justify-between items-center p-4 ${index % 2 !== 0 ? 'bg-zinc-800/50' : ''}">
-                    <label for="${service.id}" class="flex items-center cursor-pointer group flex-1 pr-4">
-                        <input type="checkbox" id="${service.id}" class="form-checkbox item-checkbox flex-shrink-0" data-id="${service.id}" data-type="service" aria-label="Selecionar ${service.name}">
-                        <span class="ml-4 group-hover:text-amber-400 transition-colors">${service.name}${highlightBadge}</span>
-                    </label>
-                    <span class="font-semibold text-lg">${formatCurrency(service.price)}</span>
-                </div>
-            `}).join('');
-        };
-        
-        const renderProducts = () => {
-            if(!elements.productsList) return;
-            elements.productsList.innerHTML = data.products.map(product => {
-                const isInCart = cart.some(item => item.id === product.id);
-                const cartButtonClass = isInCart 
-                    ? 'bg-red-500 hover:bg-red-600 text-white' 
-                    : 'bg-amber-500 hover:bg-amber-600 text-black';
-                const cartButtonText = isInCart ? 'Remover' : 'Adicionar';
-                const cartButtonIcon = isInCart ? 'fa-times' : 'fa-cart-plus';
-
-                return `
-                <div class="bg-zinc-800 rounded-lg text-center p-4 shadow-lg flex flex-col transform hover:-translate-y-2 transition-transform duration-300 fade-in-up">
-                    <img loading="lazy" src="${product.img}" alt="${product.name}" class="rounded-md mb-4 w-full h-32 object-cover">
-                    <h3 class="font-bold text-lg text-amber-400 mb-2 h-12 flex items-center justify-center">${product.name}</h3>
-                    <p class="text-xl font-bold mt-2 mb-4">${formatCurrency(product.price)}</p>
-                    <div class="mt-auto flex flex-col sm:flex-row gap-2">
-                        <button class="add-to-cart-button ${cartButtonClass} font-bold py-2 px-3 rounded-lg transition cursor-pointer w-full flex items-center justify-center gap-2" data-id="${product.id}">
-                            <i class="fas ${cartButtonIcon} text-sm"></i>
-                            <span class="button-label text-sm">${cartButtonText}</span>
-                        </button>
-                         <button class="view-details-button bg-zinc-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-zinc-600 transition cursor-pointer w-full text-sm" data-id="${product.id}">
-                            Detalhes
-                        </button>
-                    </div>
-                </div>
-            `}).join('');
-        };
-
-        const renderGallery = () => {
-            if (!elements.galleryGrid) return;
-            elements.galleryGrid.innerHTML = data.gallery.map(image => `
-                <div class="fade-in-up group relative overflow-hidden rounded-lg shadow-lg">
-                    <img loading="lazy" src="${image.src}" alt="${image.alt}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
-                    <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500 flex items-end justify-start p-4">
-                        <p class="text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">${image.alt}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        const renderTestimonials = () => {
-            if (!elements.testimonialsGrid) return;
-            elements.testimonialsGrid.innerHTML = data.testimonials.map(testimonial => `
-                <div class="bg-black p-6 rounded-lg shadow-lg fade-in-up">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-amber-400 flex items-center justify-center text-black font-bold text-xl mr-4">${testimonial.name.charAt(0)}</div>
-                        <div>
-                            <h4 class="font-bold text-lg">${testimonial.name}</h4>
-                            <div class="text-amber-400">
-                                ${'★'.repeat(testimonial.rating)}${'☆'.repeat(5 - testimonial.rating)}
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-zinc-300">“${testimonial.text}”</p>
-                </div>
-            `).join('');
-        }
-
-        // --- Lógica de Agendamento ---
-        const renderCalendar = () => {
-            const month = currentDate.getMonth();
-            const year = currentDate.getFullYear();
-            elements.monthYearLabel.textContent = `${new Date(year, month).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}`;
-            
-            const firstDayOfMonth = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            elements.calendarGrid.innerHTML = '';
-            const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-            weekDays.forEach(day => {
-                elements.calendarGrid.innerHTML += `<div class="font-bold text-amber-400 text-xs">${day}</div>`;
-            });
-
-            for (let i = 0; i < firstDayOfMonth; i++) {
-                elements.calendarGrid.innerHTML += '<div></div>';
-            }
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dayDate = new Date(year, month, i);
-                const isToday = dayDate.toDateString() === new Date().toDateString();
-                const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
-                
-                let dayClasses = 'p-2 rounded-full cursor-pointer hover:bg-amber-500 hover:text-black transition-colors';
-                if (isToday) dayClasses += ' bg-amber-400 text-black';
-                if (isSelected) dayClasses += ' bg-green-500 text-white';
-
-                elements.calendarGrid.innerHTML += `<div class="${dayClasses}" data-date="${dayDate}">${i}</div>`;
-            }
-        };
-
-        const renderTimeSlots = () => {
-            elements.timeSlotsGrid.innerHTML = '';
-            if (!selectedDate) {
-                elements.timeSlotsGrid.innerHTML = '<p class="col-span-full text-center text-zinc-400">Selecione uma data para ver os horários.</p>';
-                return;
-            }
-
-            const dayOfWeek = selectedDate.getDay(); // 0 = Domingo, 1 = Segunda
-
-            if (dayOfWeek === 0 || dayOfWeek === 1) { // Domingo ou Segunda
-                elements.timeSlotsGrid.innerHTML = '<p class="col-span-full text-center text-amber-400 font-bold">Fechado neste dia.</p>';
-                return;
-            }
-
-            const dailyBookedTimes = bookedTimes[selectedDate?.toISOString().split('T')[0]] || [];
-            
-            let timeSlots = [];
-            if (dayOfWeek >= 2 && dayOfWeek <= 5) { // Terça a Sexta
-                for (let hour = 8; hour < 20; hour++) {
-                    timeSlots.push(`${String(hour).padStart(2, '0')}:00`);
-                    timeSlots.push(`${String(hour).padStart(2, '0')}:30`);
-                }
-            } else if (dayOfWeek === 6) { // Sábado
-                timeSlots.push("08:30");
-                for (let hour = 9; hour < 20; hour++) {
-                    timeSlots.push(`${String(hour).padStart(2, '0')}:00`);
-                    timeSlots.push(`${String(hour).padStart(2, '0')}:30`);
-                }
-            }
-
-            timeSlots.forEach(time => {
-                const isSelected = selectedTime === time;
-                const isBooked = dailyBookedTimes.some(booking => booking.time === time);
-                
-                let timeClasses = 'p-2 text-sm rounded-lg cursor-pointer bg-zinc-700 hover:bg-amber-500 hover:text-black transition-colors';
-                if (isSelected) {
-                    timeClasses = 'p-2 text-sm rounded-lg cursor-pointer bg-green-500 text-white';
-                } else if (isBooked) {
-                    timeClasses = 'p-2 text-sm rounded-lg bg-zinc-800 text-zinc-600 cursor-not-allowed';
-                }
-
-                elements.timeSlotsGrid.innerHTML += `<div class="${timeClasses}" data-time="${time}" ${isBooked ? 'disabled' : ''}>${time}</div>`;
-            });
-        };
-
-        // --- Lógica do Carrinho ---
-        const updateCart = () => {
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            elements.cartTotal.textContent = `Total: ${formatCurrency(total)}`;
-            
-            const itemCount = cart.length;
-            elements.cartItemsCount.textContent = `${itemCount} ${itemCount === 1 ? 'item selecionado' : 'itens selecionados'}`;
-
-            if (itemCount > 0) {
-                elements.cartSummary.classList.remove('translate-y-full');
-            } else {
-                elements.cartSummary.classList.add('translate-y-full');
-            }
-
-            if (itemCount > 0 && selectedDate && selectedTime) {
-                elements.checkoutButton.disabled = false;
-            } else {
-                elements.checkoutButton.disabled = true;
-            }
-            renderProducts(); // Re-renderiza os produtos para atualizar o estado do botão
-        };
-        
-        const handleServiceSelection = (e) => {
-            const checkbox = e.target;
-            if (!checkbox.classList.contains('item-checkbox')) return;
-            const id = checkbox.dataset.id;
-            const item = data.services.find(i => i.id === id);
-            const isInCart = cart.some(cartItem => cartItem.id === id);
-
-            if (checkbox.checked && !isInCart) {
-                cart.push(item);
-            } else if (!checkbox.checked) {
-                cart = cart.filter(cartItem => cartItem.id !== id);
-            }
-            updateCart();
-        };
-
-        const handleDirectProductAddToCart = (productId) => {
-            const isInCart = cart.some(item => item.id === productId);
-            if (isInCart) {
-                cart = cart.filter(item => item.id !== productId);
-            } else {
-                const item = data.products.find(p => p.id === productId);
-                cart.push(item);
-            }
-            updateCart();
-        };
-        
-        const generateWhatsAppMessage = (clientName, clientPhone) => {
-            let message = `Olá, Barbershop Igor! Novo agendamento:\n\n`;
-            message += `*Cliente:* ${clientName}\n`;
-            message += `*Telefone:* ${clientPhone}\n`;
-            message += `*Data:* ${selectedDate.toLocaleDateString('pt-BR')}\n`;
-            message += `*Horário:* ${selectedTime}\n\n`;
-            
-            const serviceItems = cart.filter(item => data.services.some(s => s.id === item.id));
-            const productItems = cart.filter(item => data.products.some(p => p.id === item.id));
-
-            if (serviceItems.length > 0) {
-                message += "*SERVIÇOS:*\n";
-                serviceItems.forEach(item => { message += `- ${item.name} (${formatCurrency(item.price)})\n`; });
-            }
-
-            if (productItems.length > 0) {
-                message += "\n*PRODUTOS:*\n";
-                productItems.forEach(item => { message += `- ${item.name} (${formatCurrency(item.price)})\n`; });
-            }
-            
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            message += `\n*Total do Pedido: ${formatCurrency(total)}*`;
-
-            return encodeURIComponent(message);
-        };
-
-        // --- Lógica da UI ---
-        const openProductModal = (productId) => {
-            const product = data.products.find(p => p.id === productId);
-
-            if (!product) return;
-
-            elements.modalProductImage.src = product.img;
-            elements.modalProductImage.alt = product.name;
-            elements.modalProductTitle.textContent = product.name;
-            elements.modalProductDescription.textContent = product.description;
-            elements.modalProductPrice.textContent = formatCurrency(product.price);
-            
-            const isInCart = cart.some(item => item.id === productId);
-            elements.modalAddToCartButton.textContent = isInCart ? 'Adicionado ✓' : 'Adicionar ao Pedido';
-            elements.modalAddToCartButton.disabled = isInCart;
-            if (isInCart) {
-                elements.modalAddToCartButton.classList.add('bg-green-500');
-                elements.modalAddToCartButton.classList.remove('bg-amber-500');
-            } else {
-                elements.modalAddToCartButton.classList.remove('bg-green-500');
-                elements.modalAddToCartButton.classList.add('bg-amber-500');
-            }
-
-            elements.modalAddToCartButton.onclick = () => {
-                handleDirectProductAddToCart(productId);
-                closeProductModal();
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Constantes e Variáveis ---
+            const elements = {
+                servicesList: document.getElementById('services-list'),
+                productsList: document.getElementById('products-list'),
+                galleryGrid: document.getElementById('gallery-grid'),
+                testimonialsGrid: document.getElementById('testimonials-grid'),
+                cartSummary: document.getElementById('cart-summary'),
+                cartTotal: document.getElementById('cart-total'),
+                cartItemsCount: document.getElementById('cart-items-count'),
+                checkoutButton: document.getElementById('checkout-button'),
+                mobileMenuButton: document.getElementById('mobile-menu-button'),
+                mobileMenu: document.getElementById('mobile-menu'),
+                menuLinks: document.querySelectorAll('.menu-link'),
+                backToTopButton: document.getElementById('back-to-top'),
+                productModal: document.getElementById('product-modal'),
+                modalCloseButton: document.getElementById('modal-close-button'),
+                modalProductImage: document.getElementById('modal-product-image'),
+                modalProductTitle: document.getElementById('modal-product-title'),
+                modalProductDescription: document.getElementById('modal-product-description'),
+                modalProductPrice: document.getElementById('modal-product-price'),
+                modalAddToCartButton: document.getElementById('modal-add-to-cart-button'),
+                calendarGrid: document.getElementById('calendar-grid'),
+                monthYearLabel: document.getElementById('month-year-label'),
+                prevMonthBtn: document.getElementById('prev-month-btn'),
+                nextMonthBtn: document.getElementById('next-month-btn'),
+                timeSlotsGrid: document.getElementById('time-slots-grid'),
+                confirmationModal: document.getElementById('confirmation-modal'),
+                confirmationSummary: document.getElementById('confirmation-summary'),
+                cancelConfirmationBtn: document.getElementById('cancel-confirmation-btn'),
+                confirmBookingBtn: document.getElementById('confirm-booking-btn'),
+                clientNameInput: document.getElementById('client-name'),
+                clientPhoneInput: document.getElementById('client-phone'),
+                schedulingContainer: document.getElementById('scheduling-container'),
             };
 
-            elements.productModal.classList.remove('hidden');
-            elements.productModal.classList.add('flex');
-            setTimeout(() => elements.productModal.classList.remove('opacity-0'), 10);
-            document.body.style.overflow = 'hidden';
-        };
+            const phoneNumber = "553599458955";
 
-        const closeProductModal = () => {
-            elements.productModal.classList.add('opacity-0');
-            setTimeout(() => {
-                elements.productModal.classList.add('hidden');
-                elements.productModal.classList.remove('flex');
-                document.body.style.overflow = 'auto';
-            }, 300);
-        };
-
-        const openConfirmationModal = () => {
-            if(cart.length === 0) {
-                alert("Por favor, selecione pelo menos um serviço ou produto.");
-                return;
-            }
-            if(!selectedDate) {
-                alert("Por favor, selecione uma data para o agendamento.");
-                return;
-            }
-             if(!selectedTime) {
-                alert("Por favor, selecione um horário para o agendamento.");
-                return;
-            }
-
-            let summaryHtml = `<p class="mb-2"><strong class="text-amber-400">Data:</strong> ${selectedDate.toLocaleDateString('pt-BR')}</p>`;
-            summaryHtml += `<p class="mb-4"><strong class="text-amber-400">Horário:</strong> ${selectedTime}</p>`;
+            const data = {
+                services: [
+                    { id: 'serv1', name: 'Corte de Cabelo', price: 30.00 },
+                    { id: 'serv2', name: 'Barba', price: 20.00 },
+                    { id: 'serv3', name: 'Sobrancelha', price: 5.00 },
+                    { id: 'serv4', name: 'Combo (Corte, Barba e Sobrancelha)', price: 50.00 },
+                    { id: 'serv5', name: 'Pezinho', price: 10.00 },
+                    { id: 'serv6', name: 'Pigmentação', price: 100.00 },
+                    { id: 'serv7', name: 'Platinado', price: 100.00 },
+                    { id: 'serv8', name: 'Combo Mensal (Cabelo, Barba e Sobrancelha)', price: 170.00, highlight: 'Mais Pedido' },
+                ],
+                products: [
+                    { id: 'prod1', name: 'Pomada Modeladora', description: 'Efeito matte, alta fixação.', price: 45.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Pomada' },
+                    { id: 'prod2', name: 'Balm para Barba', description: 'Hidrata, amacia e alivia a coceira.', price: 50.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Balm' },
+                    { id: 'prod3', name: 'Shampoo Fortalecedor', description: 'Limpeza e combate à queda.', price: 55.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Shampoo' },
+                    { id: 'prod4', name: 'Óleo para Barba', description: 'Brilho, maciez e um aroma incrível.', price: 40.00, img: 'https://placehold.co/300x300/3f3f46/amber-400?text=Óleo' },
+                ],
+                gallery: [
+                    { src: 'https://i.imgur.com/dtzKRWS.jpeg', alt: 'Corte Moderno' },
+                    { src: 'https://i.imgur.com/IXPtx0W.jpeg', alt: 'Barba Alinhada' },
+                    { src: 'https://i.imgur.com/rSIUamO.jpeg', alt: 'Platinado' },
+                    { src: 'https://i.imgur.com/Vwo6xSG.jpeg', alt: 'Pigmentação' },
+                ],
+                testimonials: [
+                    { name: 'João P.', text: 'Atendimento nota 10 e o corte ficou exatamente como eu queria. Virei cliente fiel!', rating: 5 },
+                    { name: 'Carlos S.', text: 'Melhor barbearia da região! Ambiente agradável e profissionais excelentes.', rating: 5 },
+                    { name: 'Lucas M.', text: 'O Igor tem a mão boa para a barba. Recomendo a todos que querem um serviço de qualidade.', rating: 5 },
+                ]
+            };
             
-            summaryHtml += '<h4 class="font-bold border-t border-zinc-700 pt-2 mt-2">Itens:</h4><ul class="list-disc list-inside mb-4">';
-            cart.forEach(item => {
-                summaryHtml += `<li>${item.name} - ${formatCurrency(item.price)}</li>`;
-            });
-            summaryHtml += '</ul>';
+            let cart = [];
+            let selectedDate = null;
+            let selectedTime = null;
+            let currentDate = new Date();
+            let bookedTimes = {};
+            let unsubscribeAppointments = () => {};
+            let db, auth, appointmentsCollection;
 
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            summaryHtml += `<p class="text-xl font-bold border-t border-zinc-700 pt-2 mt-2">Total: ${formatCurrency(total)}</p>`;
+            // --- Funções de Renderização ---
 
-            elements.confirmationSummary.innerHTML = summaryHtml;
+            const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
 
-            elements.confirmationModal.classList.remove('hidden');
-            elements.confirmationModal.classList.add('flex');
-            setTimeout(() => elements.confirmationModal.classList.remove('opacity-0'), 10);
-            document.body.style.overflow = 'hidden';
-        };
+            const renderServices = () => {
+                if(!elements.servicesList) return;
+                elements.servicesList.innerHTML = data.services.map((service, index) => {
+                    const highlightBadge = service.highlight 
+                        ? `<span class="ml-2 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-full align-middle">${service.highlight}</span>` 
+                        : '';
+                    return `
+                    <div class="flex justify-between items-center p-4 ${index % 2 !== 0 ? 'bg-zinc-800/50' : ''}">
+                        <label for="${service.id}" class="flex items-center cursor-pointer group flex-1 pr-4">
+                            <input type="checkbox" id="${service.id}" class="form-checkbox item-checkbox flex-shrink-0" data-id="${service.id}" data-type="service" aria-label="Selecionar ${service.name}">
+                            <span class="ml-4 group-hover:text-amber-400 transition-colors">${service.name}${highlightBadge}</span>
+                        </label>
+                        <span class="font-semibold text-lg">${formatCurrency(service.price)}</span>
+                    </div>
+                `}).join('');
+            };
+            
+            const renderProducts = () => {
+                if(!elements.productsList) return;
+                elements.productsList.innerHTML = data.products.map(product => {
+                    const isInCart = cart.some(item => item.id === product.id);
+                    const cartButtonClass = isInCart 
+                        ? 'bg-red-500 hover:bg-red-600 text-white' 
+                        : 'bg-amber-500 hover:bg-amber-600 text-black';
+                    const cartButtonText = isInCart ? 'Remover' : 'Adicionar';
+                    const cartButtonIcon = isInCart ? 'fa-times' : 'fa-cart-plus';
 
-        const closeConfirmationModal = () => {
-            elements.confirmationModal.classList.add('opacity-0');
-            setTimeout(() => {
-                elements.confirmationModal.classList.add('hidden');
-                elements.confirmationModal.classList.remove('flex');
-                document.body.style.overflow = 'auto';
-            }, 300);
-        };
+                    return `
+                    <div class="bg-zinc-800 rounded-lg text-center p-4 shadow-lg flex flex-col transform hover:-translate-y-2 transition-transform duration-300 fade-in-up">
+                        <img loading="lazy" src="${product.img}" alt="${product.name}" class="rounded-md mb-4 w-full h-32 object-cover">
+                        <h3 class="font-bold text-lg text-amber-400 mb-2 h-12 flex items-center justify-center">${product.name}</h3>
+                        <p class="text-xl font-bold mt-2 mb-4">${formatCurrency(product.price)}</p>
+                        <div class="mt-auto flex flex-col sm:flex-row gap-2">
+                            <button class="add-to-cart-button ${cartButtonClass} font-bold py-2 px-3 rounded-lg transition cursor-pointer w-full flex items-center justify-center gap-2" data-id="${product.id}">
+                                <i class="fas ${cartButtonIcon} text-sm"></i>
+                                <span class="button-label text-sm">${cartButtonText}</span>
+                            </button>
+                             <button class="view-details-button bg-zinc-700 text-white font-bold py-2 px-3 rounded-lg hover:bg-zinc-600 transition cursor-pointer w-full text-sm" data-id="${product.id}">
+                                Detalhes
+                            </button>
+                        </div>
+                    </div>
+                `}).join('');
+            };
 
-        const toggleMobileMenu = () => {
-            elements.mobileMenu.classList.toggle('hidden');
-        };
-        
-        const handleScroll = () => {
-            if (window.scrollY > 300) {
-                elements.backToTopButton.classList.remove('opacity-0', 'scale-0');
-            } else {
-                elements.backToTopButton.classList.add('opacity-0', 'scale-0');
+            const renderGallery = () => {
+                if (!elements.galleryGrid) return;
+                elements.galleryGrid.innerHTML = data.gallery.map(image => `
+                    <div class="fade-in-up group relative overflow-hidden rounded-lg shadow-lg">
+                        <img loading="lazy" src="${image.src}" alt="${image.alt}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition duration-500 flex items-end justify-start p-4">
+                            <p class="text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500">${image.alt}</p>
+                        </div>
+                    </div>
+                `).join('');
             }
-        };
 
-        const scrollToTop = () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-        
-        const animateOnScroll = () => {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
+            const renderTestimonials = () => {
+                if (!elements.testimonialsGrid) return;
+                elements.testimonialsGrid.innerHTML = data.testimonials.map(testimonial => `
+                    <div class="bg-black p-6 rounded-lg shadow-lg fade-in-up">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-amber-400 flex items-center justify-center text-black font-bold text-xl mr-4">${testimonial.name.charAt(0)}</div>
+                            <div>
+                                <h4 class="font-bold text-lg">${testimonial.name}</h4>
+                                <div class="text-amber-400">
+                                    ${'★'.repeat(testimonial.rating)}${'☆'.repeat(5 - testimonial.rating)}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-zinc-300">“${testimonial.text}”</p>
+                    </div>
+                `).join('');
+            }
+
+            // --- Lógica de Agendamento ---
+            const renderCalendar = () => {
+                const month = currentDate.getMonth();
+                const year = currentDate.getFullYear();
+                elements.monthYearLabel.textContent = `${new Date(year, month).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}`;
+                
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                elements.calendarGrid.innerHTML = '';
+                const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+                weekDays.forEach(day => {
+                    elements.calendarGrid.innerHTML += `<div class="font-bold text-amber-400 text-xs">${day}</div>`;
+                });
+
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                    elements.calendarGrid.innerHTML += '<div></div>';
+                }
+
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dayDate = new Date(year, month, i);
+                    const isToday = dayDate.toDateString() === new Date().toDateString();
+                    const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
+                    
+                    let dayClasses = 'p-2 rounded-full cursor-pointer hover:bg-amber-500 hover:text-black transition-colors';
+                    if (isToday) dayClasses += ' bg-amber-400 text-black';
+                    if (isSelected) dayClasses += ' bg-green-500 text-white';
+
+                    elements.calendarGrid.innerHTML += `<div class="${dayClasses}" data-date="${dayDate}">${i}</div>`;
+                }
+            };
+
+            const renderTimeSlots = () => {
+                elements.timeSlotsGrid.innerHTML = '';
+                if (!selectedDate) {
+                    elements.timeSlotsGrid.innerHTML = '<p class="col-span-full text-center text-zinc-400">Selecione uma data para ver os horários.</p>';
+                    return;
+                }
+
+                const dayOfWeek = selectedDate.getDay(); // 0 = Domingo, 1 = Segunda
+
+                if (dayOfWeek === 0 || dayOfWeek === 1) { // Domingo ou Segunda
+                    elements.timeSlotsGrid.innerHTML = '<p class="col-span-full text-center text-amber-400 font-bold">Fechado neste dia.</p>';
+                    return;
+                }
+
+                const dailyBookedTimes = bookedTimes[selectedDate?.toISOString().split('T')[0]] || [];
+                
+                let timeSlots = [];
+                if (dayOfWeek >= 2 && dayOfWeek <= 5) { // Terça a Sexta
+                    for (let hour = 8; hour < 20; hour++) {
+                        timeSlots.push(`${String(hour).padStart(2, '0')}:00`);
+                        timeSlots.push(`${String(hour).padStart(2, '0')}:30`);
+                    }
+                } else if (dayOfWeek === 6) { // Sábado
+                    timeSlots.push("08:30");
+                    for (let hour = 9; hour < 20; hour++) {
+                        timeSlots.push(`${String(hour).padStart(2, '0')}:00`);
+                        timeSlots.push(`${String(hour).padStart(2, '0')}:30`);
+                    }
+                }
+
+                timeSlots.forEach(time => {
+                    const isSelected = selectedTime === time;
+                    const isBooked = dailyBookedTimes.some(booking => booking.time === time);
+                    
+                    let timeClasses = 'p-2 text-sm rounded-lg cursor-pointer bg-zinc-700 hover:bg-amber-500 hover:text-black transition-colors';
+                    if (isSelected) {
+                        timeClasses = 'p-2 text-sm rounded-lg cursor-pointer bg-green-500 text-white';
+                    } else if (isBooked) {
+                        timeClasses = 'p-2 text-sm rounded-lg bg-zinc-800 text-zinc-600 cursor-not-allowed';
+                    }
+
+                    elements.timeSlotsGrid.innerHTML += `<div class="${timeClasses}" data-time="${time}" ${isBooked ? 'disabled' : ''}>${time}</div>`;
+                });
+            };
+
+            // --- Lógica do Carrinho ---
+            const updateCart = () => {
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                elements.cartTotal.textContent = `Total: ${formatCurrency(total)}`;
+                
+                const itemCount = cart.length;
+                elements.cartItemsCount.textContent = `${itemCount} ${itemCount === 1 ? 'item selecionado' : 'itens selecionados'}`;
+
+                if (itemCount > 0) {
+                    elements.cartSummary.classList.remove('translate-y-full');
+                } else {
+                    elements.cartSummary.classList.add('translate-y-full');
+                }
+
+                if (itemCount > 0 && selectedDate && selectedTime) {
+                    elements.checkoutButton.disabled = false;
+                } else {
+                    elements.checkoutButton.disabled = true;
+                }
+                renderProducts(); // Re-renderiza os produtos para atualizar o estado do botão
+            };
+            
+            const handleServiceSelection = (e) => {
+                const checkbox = e.target;
+                if (!checkbox.classList.contains('item-checkbox')) return;
+                const id = checkbox.dataset.id;
+                const item = data.services.find(i => i.id === id);
+                const isInCart = cart.some(cartItem => cartItem.id === id);
+
+                if (checkbox.checked && !isInCart) {
+                    cart.push(item);
+                } else if (!checkbox.checked) {
+                    cart = cart.filter(cartItem => cartItem.id !== id);
+                }
+                updateCart();
+            };
+
+            const handleDirectProductAddToCart = (productId) => {
+                const isInCart = cart.some(item => item.id === productId);
+                if (isInCart) {
+                    cart = cart.filter(item => item.id !== productId);
+                } else {
+                    const item = data.products.find(p => p.id === productId);
+                    cart.push(item);
+                }
+                updateCart();
+            };
+            
+            const generateWhatsAppMessage = (clientName, clientPhone) => {
+                let message = `Olá, Barbershop Igor! Novo agendamento:\n\n`;
+                message += `*Cliente:* ${clientName}\n`;
+                message += `*Telefone:* ${clientPhone}\n`;
+                message += `*Data:* ${selectedDate.toLocaleDateString('pt-BR')}\n`;
+                message += `*Horário:* ${selectedTime}\n\n`;
+                
+                const serviceItems = cart.filter(item => data.services.some(s => s.id === item.id));
+                const productItems = cart.filter(item => data.products.some(p => p.id === item.id));
+
+                if (serviceItems.length > 0) {
+                    message += "*SERVIÇOS:*\n";
+                    serviceItems.forEach(item => { message += `- ${item.name} (${formatCurrency(item.price)})\n`; });
+                }
+
+                if (productItems.length > 0) {
+                    message += "\n*PRODUTOS:*\n";
+                    productItems.forEach(item => { message += `- ${item.name} (${formatCurrency(item.price)})\n`; });
+                }
+                
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                message += `\n*Total do Pedido: ${formatCurrency(total)}*`;
+
+                return encodeURIComponent(message);
+            };
+
+            // --- Lógica da UI ---
+            const openProductModal = (productId) => {
+                const product = data.products.find(p => p.id === productId);
+
+                if (!product) return;
+
+                elements.modalProductImage.src = product.img;
+                elements.modalProductImage.alt = product.name;
+                elements.modalProductTitle.textContent = product.name;
+                elements.modalProductDescription.textContent = product.description;
+                elements.modalProductPrice.textContent = formatCurrency(product.price);
+                
+                const isInCart = cart.some(item => item.id === productId);
+                elements.modalAddToCartButton.textContent = isInCart ? 'Adicionado ✓' : 'Adicionar ao Pedido';
+                elements.modalAddToCartButton.disabled = isInCart;
+                if (isInCart) {
+                    elements.modalAddToCartButton.classList.add('bg-green-500');
+                    elements.modalAddToCartButton.classList.remove('bg-amber-500');
+                } else {
+                    elements.modalAddToCartButton.classList.remove('bg-green-500');
+                    elements.modalAddToCartButton.classList.add('bg-amber-500');
+                }
+
+                elements.modalAddToCartButton.onclick = () => {
+                    handleDirectProductAddToCart(productId);
+                    closeProductModal();
+                };
+
+                elements.productModal.classList.remove('hidden');
+                elements.productModal.classList.add('flex');
+                setTimeout(() => elements.productModal.classList.remove('opacity-0'), 10);
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeProductModal = () => {
+                elements.productModal.classList.add('opacity-0');
+                setTimeout(() => {
+                    elements.productModal.classList.add('hidden');
+                    elements.productModal.classList.remove('flex');
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            };
+
+            const openConfirmationModal = () => {
+                if(cart.length === 0) {
+                    alert("Por favor, selecione pelo menos um serviço ou produto.");
+                    return;
+                }
+                if(!selectedDate) {
+                    alert("Por favor, selecione uma data para o agendamento.");
+                    return;
+                }
+                 if(!selectedTime) {
+                    alert("Por favor, selecione um horário para o agendamento.");
+                    return;
+                }
+
+                let summaryHtml = `<p class="mb-2"><strong class="text-amber-400">Data:</strong> ${selectedDate.toLocaleDateString('pt-BR')}</p>`;
+                summaryHtml += `<p class="mb-4"><strong class="text-amber-400">Horário:</strong> ${selectedTime}</p>`;
+                
+                summaryHtml += '<h4 class="font-bold border-t border-zinc-700 pt-2 mt-2">Itens:</h4><ul class="list-disc list-inside mb-4">';
+                cart.forEach(item => {
+                    summaryHtml += `<li>${item.name} - ${formatCurrency(item.price)}</li>`;
+                });
+                summaryHtml += '</ul>';
+
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                summaryHtml += `<p class="text-xl font-bold border-t border-zinc-700 pt-2 mt-2">Total: ${formatCurrency(total)}</p>`;
+
+                elements.confirmationSummary.innerHTML = summaryHtml;
+
+                elements.confirmationModal.classList.remove('hidden');
+                elements.confirmationModal.classList.add('flex');
+                setTimeout(() => elements.confirmationModal.classList.remove('opacity-0'), 10);
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeConfirmationModal = () => {
+                elements.confirmationModal.classList.add('opacity-0');
+                setTimeout(() => {
+                    elements.confirmationModal.classList.add('hidden');
+                    elements.confirmationModal.classList.remove('flex');
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            };
+
+            const toggleMobileMenu = () => {
+                elements.mobileMenu.classList.toggle('hidden');
+            };
+            
+            const handleScroll = () => {
+                if (window.scrollY > 300) {
+                    elements.backToTopButton.classList.remove('opacity-0', 'scale-0');
+                } else {
+                    elements.backToTopButton.classList.add('opacity-0', 'scale-0');
+                }
+            };
+
+            const scrollToTop = () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            
+            const animateOnScroll = () => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.fade-in-up').forEach(item => {
+                    observer.observe(item);
+                });
+            };
+
+            const listenToAppointments = (date) => {
+                unsubscribeAppointments(); // Cancela o listener anterior
+                const dateString = date.toISOString().split('T')[0];
+                const q = query(appointmentsCollection, where("date", "==", dateString));
+
+                unsubscribeAppointments = onSnapshot(q, (querySnapshot) => {
+                    bookedTimes[dateString] = [];
+                    querySnapshot.forEach((doc) => {
+                        bookedTimes[dateString].push({ id: doc.id, ...doc.data() });
+                    });
+                    renderTimeSlots();
+                });
+            };
+
+            // --- Event Listeners ---
+            function setupEventListeners() {
+                elements.confirmBookingBtn.addEventListener('click', async () => {
+                    const clientName = elements.clientNameInput.value;
+                    const clientPhone = elements.clientPhoneInput.value;
+
+                    if (!clientName || !clientPhone) {
+                        alert("Por favor, preencha seu nome e telefone.");
+                        return;
+                    }
+
+                    const message = generateWhatsAppMessage(clientName, clientPhone);
+                    if(message){
+                        // Salvar no Firestore
+                        const appointment = {
+                            date: selectedDate.toISOString().split('T')[0],
+                            time: selectedTime,
+                            clientName,
+                            clientPhone,
+                            services: cart.filter(item => item.id.startsWith('serv')).map(item => item.name),
+                            products: cart.filter(item => item.id.startsWith('prod')).map(item => item.name),
+                            total: cart.reduce((sum, item) => sum + item.price, 0),
+                            userId: auth.currentUser.uid,
+                            createdAt: new Date(),
+                        };
+                        try {
+                            await addDoc(appointmentsCollection, appointment);
+                        } catch (e) {
+                            console.error("Erro ao adicionar documento: ", e);
+                        }
+
+                        // Enviar para o WhatsApp
+                        const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
+                        window.open(whatsappURL, '_blank');
+                    }
+                    closeConfirmationModal();
+                });
+
+                elements.checkoutButton.addEventListener('click', openConfirmationModal);
+                elements.cancelConfirmationBtn.addEventListener('click', closeConfirmationModal);
+                
+                elements.servicesList?.addEventListener('change', handleServiceSelection);
+                
+                elements.productsList?.addEventListener('click', (e) => {
+                    const detailsButton = e.target.closest('.view-details-button');
+                    const addButton = e.target.closest('.add-to-cart-button');
+
+                    if (detailsButton) {
+                        openProductModal(detailsButton.dataset.id);
+                    } else if (addButton) {
+                        handleDirectProductAddToCart(addButton.dataset.id);
                     }
                 });
-            }, { threshold: 0.1 });
 
-            document.querySelectorAll('.fade-in-up').forEach(item => {
-                observer.observe(item);
-            });
-        };
-
-        const listenToAppointments = (date) => {
-            unsubscribeAppointments(); // Cancela o listener anterior
-            const dateString = date.toISOString().split('T')[0];
-            const q = query(appointmentsCollection, where("date", "==", dateString));
-
-            unsubscribeAppointments = onSnapshot(q, (querySnapshot) => {
-                bookedTimes[dateString] = [];
-                querySnapshot.forEach((doc) => {
-                    bookedTimes[dateString].push({ id: doc.id, ...doc.data() });
+                elements.modalCloseButton.addEventListener('click', closeProductModal);
+                elements.productModal.addEventListener('click', (e) => {
+                    if (e.target === elements.productModal) {
+                        closeProductModal();
+                    }
                 });
-                renderTimeSlots();
-            });
-        };
+                elements.mobileMenuButton.addEventListener('click', toggleMobileMenu);
+                elements.menuLinks.forEach(link => link.addEventListener('click', toggleMobileMenu));
+                window.addEventListener('scroll', handleScroll);
+                elements.backToTopButton.addEventListener('click', scrollToTop);
+                
+                elements.prevMonthBtn.addEventListener('click', () => {
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                    renderCalendar();
+                });
 
-        // --- Event Listeners ---
-        elements.confirmBookingBtn.addEventListener('click', async () => {
-            const clientName = elements.clientNameInput.value;
-            const clientPhone = elements.clientPhoneInput.value;
+                elements.nextMonthBtn.addEventListener('click', () => {
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                    renderCalendar();
+                });
 
-            if (!clientName || !clientPhone) {
-                alert("Por favor, preencha seu nome e telefone.");
-                return;
+                elements.calendarGrid.addEventListener('click', (e) => {
+                    if (e.target.dataset.date) {
+                        selectedDate = new Date(e.target.dataset.date);
+                        selectedTime = null; // Reset time when date changes
+                        renderCalendar();
+                        listenToAppointments(selectedDate);
+                        updateCart();
+                    }
+                });
+
+                elements.timeSlotsGrid.addEventListener('click', async (e) => {
+                    const timeSlot = e.target.closest('[data-time]');
+                    if (!timeSlot || timeSlot.hasAttribute('disabled')) return;
+                    selectedTime = timeSlot.dataset.time;
+                    renderTimeSlots();
+                    updateCart();
+                });
             }
 
-            const message = generateWhatsAppMessage(clientName, clientPhone);
-            if(message){
-                // Salvar no Firestore
-                const appointment = {
-                    date: selectedDate.toISOString().split('T')[0],
-                    time: selectedTime,
-                    clientName,
-                    clientPhone,
-                    services: cart.filter(item => item.id.startsWith('serv')).map(item => item.name),
-                    products: cart.filter(item => item.id.startsWith('prod')).map(item => item.name),
-                    total: cart.reduce((sum, item) => sum + item.price, 0),
-                    userId: auth.currentUser.uid,
-                    createdAt: new Date(),
-                };
+            // --- Inicialização ---
+            async function initializeAppWithFirebase() {
                 try {
-                    await addDoc(appointmentsCollection, appointment);
-                } catch (e) {
-                    console.error("Erro ao adicionar documento: ", e);
+                    // Configuração do Firebase
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    // Inicializar Firebase
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    appointmentsCollection = collection(db, `artifacts/${appId}/public/data/appointments`);
+                    
+                    if (typeof __initial_auth_token !== 'undefined') {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    renderCalendar();
+                    renderTimeSlots();
+                } catch (error) {
+                    console.error("Erro na autenticação ou inicialização do Firebase:", error);
+                    if(elements.schedulingContainer) {
+                        elements.schedulingContainer.innerHTML = '<p class="text-center text-red-500">O sistema de agendamento está indisponível no momento. Por favor, tente mais tarde.</p>';
+                    }
                 }
-
-                // Enviar para o WhatsApp
-                const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
-                window.open(whatsappURL, '_blank');
             }
-            closeConfirmationModal();
-        });
 
-        elements.checkoutButton.addEventListener('click', openConfirmationModal);
-        elements.cancelConfirmationBtn.addEventListener('click', closeConfirmationModal);
-        
-        elements.servicesList?.addEventListener('change', handleServiceSelection);
-        
-        elements.productsList?.addEventListener('click', (e) => {
-            const detailsButton = e.target.closest('.view-details-button');
-            const addButton = e.target.closest('.add-to-cart-button');
-
-            if (detailsButton) {
-                openProductModal(detailsButton.dataset.id);
-            } else if (addButton) {
-                handleDirectProductAddToCart(addButton.dataset.id);
-            }
+            renderServices();
+            renderProducts();
+            renderGallery();
+            renderTestimonials();
+            animateOnScroll();
+            setupEventListeners();
+            initializeAppWithFirebase();
         });
-
-        elements.modalCloseButton.addEventListener('click', closeProductModal);
-        elements.productModal.addEventListener('click', (e) => {
-            if (e.target === elements.productModal) {
-                closeProductModal();
-            }
-        });
-        elements.mobileMenuButton.addEventListener('click', toggleMobileMenu);
-        elements.menuLinks.forEach(link => link.addEventListener('click', toggleMobileMenu));
-        window.addEventListener('scroll', handleScroll);
-        elements.backToTopButton.addEventListener('click', scrollToTop);
-        
-        elements.prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        });
-
-        elements.nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        elements.calendarGrid.addEventListener('click', (e) => {
-            if (e.target.dataset.date) {
-                selectedDate = new Date(e.target.dataset.date);
-                selectedTime = null; // Reset time when date changes
-                renderCalendar();
-                listenToAppointments(selectedDate);
-                updateCart();
-            }
-        });
-
-        elements.timeSlotsGrid.addEventListener('click', async (e) => {
-            const timeSlot = e.target.closest('[data-time]');
-            if (!timeSlot || timeSlot.hasAttribute('disabled')) return;
-            selectedTime = timeSlot.dataset.time;
-            renderTimeSlots();
-            updateCart();
-        });
-
-        // --- Inicialização ---
-        (async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                renderServices();
-                renderProducts();
-                renderGallery();
-                renderTestimonials();
-                renderCalendar();
-                renderTimeSlots();
-                animateOnScroll();
-            } catch (error) {
-                console.error("Erro na autenticação:", error);
-            }
-        })();
     </script>
 </body>
 </html>
