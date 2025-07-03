@@ -380,6 +380,9 @@
         import { getFirestore, collection, doc, onSnapshot, addDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
+            
+            let db, auth, appointmentsCollection;
+
             // --- Constantes e Variáveis ---
             const elements = {
                 servicesList: document.getElementById('services-list'),
@@ -453,7 +456,6 @@
             let currentDate = new Date();
             let bookedTimes = {};
             let unsubscribeAppointments = () => {};
-            let db, auth, appointmentsCollection;
 
             // --- Funções de Renderização ---
 
