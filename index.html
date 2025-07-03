@@ -581,7 +581,7 @@
                 return;
             }
 
-            const dayOfWeek = selectedDate.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+            const dayOfWeek = selectedDate.getDay(); // 0 = Domingo, 1 = Segunda
 
             if (dayOfWeek === 0 || dayOfWeek === 1) { // Domingo ou Segunda
                 elements.timeSlotsGrid.innerHTML = '<p class="col-span-full text-center text-amber-400 font-bold">Fechado neste dia.</p>';
