@@ -379,10 +379,28 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, onSnapshot, addDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- INÍCIO DA CONFIGURAÇÃO DO FIREBASE ---
+        // SUBSTITUA ESTE BLOCO PELO SEU CÓDIGO DE CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+          apiKey: "AIzaSyD8yHJ7edXgYYassRnoe47lrcpWkC9rsRE",
+          authDomain: "barbeariaigor-618b5.firebaseapp.com",
+          projectId: "barbeariaigor-618b5",
+          storageBucket: "barbeariaigor-618b5.appspot.com",
+          messagingSenderId: "84742096000",
+          appId: "1:84742096000:web:020d51e1275048216e9265",
+          measurementId: "G-C6EMMZXXF8"
+        };
+        // --- FIM DA CONFIGURAÇÃO DO FIREBASE ---
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = firebaseConfig.appId;
+        const appointmentsCollection = collection(db, `artifacts/${appId}/public/data/appointments`);
+
+
         document.addEventListener('DOMContentLoaded', () => {
             
-            let db, auth, appointmentsCollection;
-
             // --- Constantes e Variáveis ---
             const elements = {
                 servicesList: document.getElementById('services-list'),
@@ -538,6 +556,7 @@
 
             // --- Lógica de Agendamento ---
             const renderCalendar = () => {
+                if (!elements.calendarGrid) return;
                 const month = currentDate.getMonth();
                 const year = currentDate.getFullYear();
                 elements.monthYearLabel.textContent = `${new Date(year, month).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}`;
@@ -569,6 +588,7 @@
             };
 
             const renderTimeSlots = () => {
+                if (!elements.timeSlotsGrid) return;
                 elements.timeSlotsGrid.innerHTML = '';
                 if (!selectedDate) {
                     elements.timeSlotsGrid.innerHTML = '<p class="col-span-full text-center text-zinc-400">Selecione uma data para ver os horários.</p>';
@@ -915,16 +935,6 @@
             // --- Inicialização ---
             async function initializeAppWithFirebase() {
                 try {
-                    // Configuração do Firebase
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-                    // Inicializar Firebase
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                    appointmentsCollection = collection(db, `artifacts/${appId}/public/data/appointments`);
-                    
                     if (typeof __initial_auth_token !== 'undefined') {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
